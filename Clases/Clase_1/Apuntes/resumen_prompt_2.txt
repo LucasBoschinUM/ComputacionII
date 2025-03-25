@@ -1,0 +1,136 @@
+Apunte: Uso de Argumentos de Línea de Comandos en Python
+1. Introducción a los Argumentos de Línea de Comandos
+
+    Definición: Los argumentos de línea de comandos son valores que pasamos a un programa cuando lo ejecutamos desde la terminal.
+
+    Acceso en Python: Se accede a estos argumentos a través de sys.argv, que es una lista. El primer valor es el nombre del script, y el resto son los argumentos que el usuario pasa.
+
+2. getopt vs argparse
+
+    getopt:
+
+        Maneja argumentos de manera más manual.
+
+        Ideal para scripts sencillos o cuando se necesitan opciones mínimas.
+
+        Permite definir opciones de corta (ej. -i) o larga (ej. --input).
+
+        Menos flexible para manejar errores o validar tipos de datos.
+
+    argparse:
+
+        Proporciona una interfaz más robusta y flexible.
+
+        Permite definir argumentos con tipos específicos, hacer que sean obligatorios, manejar valores predeterminados y generar automáticamente la ayuda del programa.
+
+        Ideal para proyectos más grandes y complejos.
+
+3. Ejemplos Prácticos
+
+    Uso de argparse:
+
+        Se define el nombre del script, los argumentos que se aceptan (obligatorios, opcionales), y cómo se procesan.
+
+        Ejemplo básico para leer un archivo de entrada y salida:
+
+    import argparse
+    import os
+
+    def main():
+        parser = argparse.ArgumentParser(description="Procesar un archivo de texto")
+        parser.add_argument('-i', '--input', required=True, help='Archivo de entrada')
+        parser.add_argument('-o', '--output', required=True, help='Archivo de salida')
+
+        args = parser.parse_args()
+
+        if not os.path.exists(args.input):
+            print(f"Error: El archivo de entrada '{args.input}' no existe.")
+            return
+
+        with open(args.input, 'r') as infile, open(args.output, 'w') as outfile:
+            for line in infile:
+                outfile.write(line)
+
+        print(f"Archivo procesado y guardado en '{args.output}'.")
+
+    if __name__ == "__main__":
+        main()
+
+Uso de getopt:
+
+    getopt se usa para un control más manual de los argumentos y tiene una sintaxis distinta:
+
+        import getopt
+        import sys
+        import os
+
+        def main():
+            try:
+                opts, args = getopt.getopt(sys.argv[1:], 'i:o:')
+            except getopt.GetoptError as err:
+                print(str(err))
+                sys.exit(2)
+
+            input_file = None
+            output_file = None
+
+            for opt, arg in opts:
+                if opt in ('-i', '--input'):
+                    input_file = arg
+                elif opt in ('-o', '--output'):
+                    output_file = arg
+
+            if not input_file or not output_file:
+                print("Error: Debes proporcionar tanto el archivo de entrada como el de salida.")
+                sys.exit(2)
+
+            if not os.path.exists(input_file):
+                print(f"Error: El archivo de entrada '{input_file}' no existe.")
+                return
+
+            with open(input_file, 'r') as infile, open(output_file, 'w') as outfile:
+                for line in infile:
+                    outfile.write(line)
+
+            print(f"Archivo procesado y guardado en '{output_file}'.")
+
+        if __name__ == "__main__":
+            main()
+
+4. Manejo de Tipos de Datos en Argumentos (Con argparse)
+
+    Tipos de datos: argparse permite especificar el tipo de dato de un argumento, como int, float, str, etc.
+
+    Ejemplo:
+
+parser.add_argument('--count', type=int, help="Número de repeticiones", required=True)
+
+Manejo de listas: Se pueden pasar múltiples valores a un argumento mediante nargs='+'.
+
+    parser.add_argument('--items', nargs='+', help="Lista de elementos", required=True)
+
+5. Validación de Argumentos
+
+    Argumentos obligatorios: En argparse, se puede hacer que un argumento sea obligatorio usando required=True.
+
+    Argumentos con valores predeterminados: Se pueden asignar valores predeterminados si el usuario no pasa un valor.
+
+    parser.add_argument('--verbose', action='store_true', help="Mostrar salida detallada")
+
+6. Comparación entre getopt y argparse
+
+    getopt: Más simple, pero con mayor necesidad de validación manual.
+
+    argparse: Más potente, con manejo automático de errores, ayuda integrada y validación de tipos.
+
+7. Aplicaciones y Casos de Uso
+
+    Scripts sencillos: Para tareas rápidas y simples, getopt puede ser suficiente.
+
+    Scripts complejos: Cuando se necesitan múltiples opciones y validación automática, argparse es la mejor opción.
+
+Conclusión
+
+    argparse es generalmente más fácil de usar y ofrece más funciones para manejar la entrada del usuario en comparación con getopt. Se recomienda usar argparse para la mayoría de los proyectos modernos, especialmente si se está construyendo una aplicación que podría escalar o requiere una interacción más detallada con el usuario.
+
+    getopt sigue siendo útil para scripts más sencillos, pero con menos flexibilidad.
